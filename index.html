@@ -1,36 +1,193 @@
-<div style="text-align:center; margin:20px; padding:20px; border:2px solid #ccc; border-radius:10px; background:#f9f9f9;">
-  <h2>Generate Your Code</h2>
-  <button onclick="generateCode()" style="padding:10px 20px; font-size:16px; cursor:pointer; background:#007bff; color:white; border:none; border-radius:5px;">
-    Generate Code
-  </button>
-  
-  <div id="codeBox" style="margin-top:20px; font-size:18px; font-weight:bold; display:none;">
-    <p style="color:red;" id="genCode"></p>
-    <p style="color:blue;" id="genTime"></p>
-    <button onclick="copyCode()" style="margin-top:10px; padding:8px 15px; font-size:14px; cursor:pointer; background:#28a745; color:white; border:none; border-radius:5px;">
-      Copy Code
-    </button>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Generate Code — Time-aware</title>
+<style>
+  :root{--bg:#071023;--card:#0c1622;--accent:#38d39f;--muted:rgba(255,255,255,0.7)}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,#041021,#082034);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+  .wrap{width:100%;max-width:980px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:12px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+  h1{margin:0 0 10px;font-size:22px}
+  .lead{color:var(--muted);margin-bottom:12px}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  #genBtn{background:linear-gradient(180deg,var(--accent),#1bb985);border:0;padding:12px 20px;border-radius:10px;font-size:18px;color:#022;cursor:pointer;font-weight:700}
+  #genBtn:active{transform:scale(.98)}
+  .display{margin-top:16px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .codeBox{font-family:monospace;font-size:20px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,0.18);color:#060; font-weight:800}
+  .timeBox{font-size:15px;color:#7ec3ff}
+  .small{font-size:13px;color:var(--muted)}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+  #history{margin-top:16px;max-height:320px;overflow:auto;border-radius:10px;padding:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;margin-bottom:8px;background:rgba(0,0,0,0.12)}
+  .meta{color:var(--muted);font-size:13px}
+  @media(max-width:720px){ .display{flex-direction:column;align-items:stretch} .controls{flex-direction:column;align-items:stretch} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Generate Code (includes Time Spent)</h1>
+      <div class="lead">Page zai ƙididdige lokacin da ka zauna. Danna <b>Generate Code</b> — za a ƙirƙiri unique code + lokaci + time-spent. Sai ka iya copy ko download history.</div>
+
+      <div class="controls">
+        <button id="genBtn">👉 Generate Code</button>
+        <button id="copyBtn" class="btn">Copy Current</button>
+        <button id="downloadBtn" class="btn">Download CSV</button>
+        <button id="clearBtn" class="btn">Clear History</button>
+        <div style="margin-left:auto" class="small">Generated: <span id="count">0</span></div>
+      </div>
+
+      <div class="display" aria-live="polite">
+        <div>
+          <div class="small">Code</div>
+          <div id="currentCode" class="codeBox">— none —</div>
+        </div>
+        <div>
+          <div class="small">Time & Spent</div>
+          <div id="currentTime" class="timeBox">— —</div>
+        </div>
+      </div>
+
+      <div id="history" aria-live="polite" aria-atomic="true">
+        <div class="small" style="padding:12px;color:var(--muted)">No history yet.</div>
+      </div>
+    </div>
   </div>
-</div>
 
 <script>
-  let fullText = "";
+/* Time tracker + generate code + local history */
+const LS_KEY = 'gen_codes_v2';
 
-  function generateCode() {
-    let code = Math.random().toString(36).substring(2, 10).toUpperCase();
-    let now = new Date();
-    let time = now.toLocaleString();
+// track time spent in seconds
+let startedAt = Date.now();
+let focused = true;
+let seconds = 0;
+let timerInterval = null;
 
-    fullText = "CODE: " + code + " | TIME: " + time;
+function startTimer(){
+  if(timerInterval) return;
+  startedAt = Date.now() - seconds*1000;
+  timerInterval = setInterval(()=> {
+    seconds = Math.floor((Date.now() - startedAt)/1000);
+  }, 1000);
+}
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+}
 
-    document.getElementById("genCode").innerHTML = "CODE: " + code;
-    document.getElementById("genTime").innerHTML = "Generated at: " + time;
-    document.getElementById("codeBox").style.display = "block";
+// handle tab visibility (pause timer when unfocused)
+document.addEventListener('visibilitychange', ()=> {
+  if(document.hidden){ stopTimer(); focused = false; }
+  else { focused = true; startTimer(); }
+});
+
+// start when page loads
+startTimer();
+
+// format seconds to human (e.g. 2m 15s)
+function formatTime(s){
+  if(s < 60) return s + 's';
+  const m = Math.floor(s/60);
+  const sec = s % 60;
+  return m + 'm ' + sec + 's';
+}
+
+// generate readable unique code
+function makeCode(){
+  const letters = () => Array.from({length:3}, () => String.fromCharCode(65 + Math.floor(Math.random()*26))).join('');
+  const part = () => Math.random().toString(36).substring(2,6).toUpperCase();
+  const rnd = Math.floor(Math.random()*9000)+1000;
+  return `${letters()}-${part()}-${rnd}`;
+}
+
+// localStorage helpers
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch(e){ return []; } }
+function saveHistory(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+
+function renderHistory(){
+  const list = loadHistory();
+  const el = document.getElementById('history');
+  if(list.length === 0){
+    el.innerHTML = '<div class="small" style="padding:12px;color:var(--muted)">No history yet.</div>';
+    document.getElementById('currentCode').textContent = '— none —';
+    document.getElementById('currentTime').textContent = '— —';
+    document.getElementById('count').textContent = 0;
+    return;
   }
-
-  function copyCode() {
-    navigator.clipboard.writeText(fullText).then(() => {
-      alert("Code copied: " + fullText);
-    });
+  document.getElementById('count').textContent = list.length;
+  const latest = list[list.length-1];
+  document.getElementById('currentCode').textContent = latest.code;
+  document.getElementById('currentTime').textContent = `${latest.time} • spent ${latest.spent}`;
+  el.innerHTML = '';
+  for(let i=list.length-1;i>=0;i--){
+    const it = list[i];
+    const row = document.createElement('div'); row.className='row';
+    const left = document.createElement('div');
+    left.innerHTML = `<div style="font-family:monospace;font-weight:700;color:#1bd38f">${it.code}</div>
+                      <div class="meta">${it.time} • spent ${it.spent}</div>`;
+    const right = document.createElement('div');
+    right.style.display='flex'; right.style.gap='8px';
+    const c = document.createElement('button'); c.className='btn'; c.textContent='Copy';
+    c.onclick = ()=> { navigator.clipboard.writeText(`${it.code} | ${it.time} | spent ${it.spent}`).then(()=>{ c.textContent='Copied!'; setTimeout(()=>c.textContent='Copy',900); }); };
+    const d = document.createElement('button'); d.className='btn'; d.textContent='Delete';
+    d.onclick = ()=> {
+      if(!confirm('Delete this entry?')) return;
+      const arr = loadHistory(); arr.splice(i,1); saveHistory(arr); renderHistory();
+    };
+    right.appendChild(c); right.appendChild(d);
+    row.appendChild(left); row.appendChild(right);
+    el.appendChild(row);
   }
+}
+
+// generate button logic
+document.getElementById('genBtn').addEventListener('click', ()=> {
+  // compute spent time now
+  const now = new Date();
+  const timeStr = now.toLocaleString();
+  seconds = Math.floor((Date.now() - startedAt)/1000);
+  const spent = formatTime(seconds);
+
+  const code = makeCode();
+  const entry = { code, time: timeStr, spent };
+  const arr = loadHistory(); arr.push(entry); saveHistory(arr);
+  renderHistory();
+
+  // small feedback animation
+  const btn = document.getElementById('genBtn');
+  btn.animate([{transform:'scale(1)'},{transform:'scale(.96)'},{transform:'scale(1)'}],{duration:140});
+});
+
+// copy current
+document.getElementById('copyBtn').addEventListener('click', ()=> {
+  const arr = loadHistory();
+  if(arr.length === 0){ alert('No code yet'); return; }
+  const last = arr[arr.length-1];
+  const text = `${last.code} | ${last.time} | spent ${last.spent}`;
+  navigator.clipboard.writeText(text).then(()=> { alert('Copied: ' + text); }).catch(()=> alert('Copy failed'));
+});
+
+// download CSV
+document.getElementById('downloadBtn').addEventListener('click', ()=> {
+  const list = loadHistory();
+  if(list.length === 0){ alert('No history to download'); return; }
+  let csv = 'code,generated_at,spent\n';
+  list.forEach(r => { csv += `"${r.code.replace(/"/g,'""')}","${r.time.replace(/"/g,'""')}","${r.spent}"\n`; });
+  const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'codes.csv'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// clear history
+document.getElementById('clearBtn').addEventListener('click', ()=> {
+  if(!confirm('Clear all saved codes in this browser?')) return;
+  localStorage.removeItem(LS_KEY); renderHistory();
+});
+
+// initial render
+renderHistory();
 </script>
+</body>
+  </html>
