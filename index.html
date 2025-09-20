@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tap to Earn Coins</title>
+  <title>Tap to Earn Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,32 +14,27 @@
     h1 {
       color: #333;
     }
-    #tapBtn, #adBtn {
+    #tapBtn {
       padding: 15px 30px;
       margin: 10px;
       font-size: 18px;
       cursor: pointer;
       border: none;
       border-radius: 10px;
-      transition: 0.3s;
-    }
-    #tapBtn {
       background: gold;
       color: #000;
+      transition: 0.3s;
     }
     #tapBtn:hover {
       background: orange;
     }
-    #adBtn {
-      background: #007bff;
-      color: #fff;
-    }
-    #adBtn:hover {
-      background: #0056b3;
-    }
     .coins {
       margin-top: 20px;
       font-size: 20px;
+    }
+    .points {
+      color: green;
+      font-weight: bold;
     }
     .yellow {
       color: goldenrod;
@@ -55,49 +50,48 @@
   <h1>🪙 Tap & Earn Game</h1>
 
   <button id="tapBtn">TAP!</button>
-  <button id="adBtn">WATCH AD</button>
 
   <div class="coins">
+    Points: <span id="points" class="points">0</span><br>
     Yellow Coins: <span id="yellowCoins" class="yellow">0</span><br>
     Blue Coins: <span id="blueCoins" class="blue">0</span>
   </div>
 
   <script>
+    let points = 0;
     let yellowCoins = 0;
     let blueCoins = 0;
-    let tapCount = 0;
 
+    const pointsDisplay = document.getElementById("points");
     const yellowDisplay = document.getElementById("yellowCoins");
     const blueDisplay = document.getElementById("blueCoins");
 
-    // Function to update coins
     function updateDisplay() {
+      pointsDisplay.textContent = points;
       yellowDisplay.textContent = yellowCoins;
       blueDisplay.textContent = blueCoins;
     }
 
-    // tapping button (1000 taps = 1 blue coin)
     document.getElementById("tapBtn").addEventListener("click", () => {
-      tapCount++;
-      if (tapCount >= 1000) {
-        blueCoins += 1;
-        tapCount = 0; // reset counting
-      }
-      updateDisplay();
-    });
+      points++;
 
-    // watch ad button (1 ad = 1 yellow coin, 1000 yellow = 1 blue)
-    document.getElementById("adBtn").addEventListener("click", () => {
-      yellowCoins += 1;
+      // Convert points -> yellow coin
+      if (points >= 1000) {
+        let extraYellow = Math.floor(points / 1000);
+        yellowCoins += extraYellow;
+        points = points % 1000; // remainder
+      }
+
+      // Convert yellow -> blue coin
       if (yellowCoins >= 1000) {
         let extraBlue = Math.floor(yellowCoins / 1000);
         blueCoins += extraBlue;
-        yellowCoins = yellowCoins % 1000; // remainder
+        yellowCoins = yellowCoins % 1000;
       }
+
       updateDisplay();
     });
 
-    // Initial display
     updateDisplay();
   </script>
 </body>
