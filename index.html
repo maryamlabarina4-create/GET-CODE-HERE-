@@ -53,14 +53,28 @@
   </div>
 
   <script>
-    let points = 0;
-    let yellow = 0;
-    let blue = 0;
+    // 🟡 Load saved data ko 0 idan babu
+    let points = parseInt(localStorage.getItem('points')) || 0;
+    let yellow = parseInt(localStorage.getItem('yellow')) || 0;
+    let blue = parseInt(localStorage.getItem('blue')) || 0;
 
     const pointsEl = document.getElementById('points');
     const yellowEl = document.getElementById('yellow');
     const blueEl = document.getElementById('blue');
 
+    // 🟡 Update UI
+    function updateDisplay() {
+      pointsEl.textContent = points;
+      yellowEl.textContent = yellow;
+      blueEl.textContent = blue;
+
+      // Save duk lokacin da aka update
+      localStorage.setItem('points', points);
+      localStorage.setItem('yellow', yellow);
+      localStorage.setItem('blue', blue);
+    }
+
+    // TAP button
     document.getElementById('tapBtn').addEventListener('click', () => {
       points++;
       if (points >= 1000) {
@@ -74,8 +88,8 @@
       updateDisplay();
     });
 
+    // WATCH AD button
     document.getElementById('watchAdBtn').addEventListener('click', () => {
-      // Temporary action: +1 Yellow Coin
       yellow++;
       if (yellow >= 1000) {
         yellow = 0;
@@ -85,11 +99,8 @@
       alert("Ad watched! You earned 1 🟡 Yellow Coin.");
     });
 
-    function updateDisplay() {
-      pointsEl.textContent = points;
-      yellowEl.textContent = yellow;
-      blueEl.textContent = blue;
-    }
+    // 🟡 Fara da saved data
+    updateDisplay();
   </script>
 </body>
 </html>
