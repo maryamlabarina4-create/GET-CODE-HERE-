@@ -2,97 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tap to Earn Game</title>
+  <title>Tap & Earn Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #ffffff;
-      padding: 30px;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
     }
     h1 {
       color: #333;
     }
-    #tapBtn {
-      padding: 15px 30px;
-      margin: 10px;
+    button {
       font-size: 18px;
-      cursor: pointer;
+      padding: 10px 20px;
+      margin: 10px;
       border: none;
       border-radius: 10px;
-      background: gold;
-      color: #000;
-      transition: 0.3s;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
     }
-    #tapBtn:hover {
-      background: orange;
+    button:hover {
+      background: #45a049;
     }
-    .coins {
+    #watchAdBtn {
+      background: #ff9800;
+    }
+    #watchAdBtn:hover {
+      background: #e68900;
+    }
+    .stats {
       margin-top: 20px;
       font-size: 20px;
     }
-    .points {
-      color: green;
-      font-weight: bold;
-    }
-    .yellow {
-      color: goldenrod;
-      font-weight: bold;
-    }
-    .blue {
-      color: blue;
-      font-weight: bold;
-    }
+    .yellow { color: goldenrod; font-weight: bold; }
+    .blue { color: blue; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>🪙 Tap & Earn Game</h1>
-
+  <h1>Tap & Earn Game</h1>
   <button id="tapBtn">TAP!</button>
+  <button id="watchAdBtn">WATCH AD</button>
 
-  <div class="coins">
-    Points: <span id="points" class="points">0</span><br>
-    Yellow Coins: <span id="yellowCoins" class="yellow">0</span><br>
-    Blue Coins: <span id="blueCoins" class="blue">0</span>
+  <div class="stats">
+    <p>Points: <span id="points">0</span></p>
+    <p>Yellow Coins 🟡: <span id="yellow">0</span></p>
+    <p>Blue Coins 🔵: <span id="blue">0</span></p>
   </div>
 
   <script>
     let points = 0;
-    let yellowCoins = 0;
-    let blueCoins = 0;
+    let yellow = 0;
+    let blue = 0;
 
-    const pointsDisplay = document.getElementById("points");
-    const yellowDisplay = document.getElementById("yellowCoins");
-    const blueDisplay = document.getElementById("blueCoins");
+    const pointsEl = document.getElementById('points');
+    const yellowEl = document.getElementById('yellow');
+    const blueEl = document.getElementById('blue');
 
-    function updateDisplay() {
-      pointsDisplay.textContent = points;
-      yellowDisplay.textContent = yellowCoins;
-      blueDisplay.textContent = blueCoins;
-    }
-
-    document.getElementById("tapBtn").addEventListener("click", () => {
+    document.getElementById('tapBtn').addEventListener('click', () => {
       points++;
-
-      // Convert points -> yellow coin
       if (points >= 1000) {
-        let extraYellow = Math.floor(points / 1000);
-        yellowCoins += extraYellow;
-        points = points % 1000; // remainder
+        points = 0;
+        yellow++;
       }
-
-      // Convert yellow -> blue coin
-      if (yellowCoins >= 1000) {
-        let extraBlue = Math.floor(yellowCoins / 1000);
-        blueCoins += extraBlue;
-        yellowCoins = yellowCoins % 1000;
+      if (yellow >= 1000) {
+        yellow = 0;
+        blue++;
       }
-
       updateDisplay();
     });
 
-    updateDisplay();
+    document.getElementById('watchAdBtn').addEventListener('click', () => {
+      // Temporary action: +1 Yellow Coin
+      yellow++;
+      if (yellow >= 1000) {
+        yellow = 0;
+        blue++;
+      }
+      updateDisplay();
+      alert("Ad watched! You earned 1 🟡 Yellow Coin.");
+    });
+
+    function updateDisplay() {
+      pointsEl.textContent = points;
+      yellowEl.textContent = yellow;
+      blueEl.textContent = blue;
+    }
   </script>
 </body>
 </html>
