@@ -2,109 +2,89 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tap & Earn Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f8f8f8;
+      background: #f9f9f9;
       margin: 0;
-      padding: 50px;
+      padding: 20px;
     }
     h1 {
       color: #333;
     }
-    .btn {
+    button {
       padding: 15px 30px;
       margin: 10px;
       font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
       cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background: #ffcc00;
+      font-weight: bold;
     }
-    .tap-btn { background: #28a745; color: white; }
-    .ads-btn { background: #007bff; color: white; }
-    .stats {
+    #stats {
       margin-top: 20px;
       font-size: 20px;
     }
-    .yellow { color: goldenrod; font-weight: bold; }
-    .blue { color: blue; font-weight: bold; }
+    .yellow {
+      color: goldenrod;
+      font-weight: bold;
+    }
+    .blue {
+      color: blue;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-
   <h1>Tap & Earn Game</h1>
-  <button class="btn tap-btn" onclick="tap()">TAP!</button>
-  <button class="btn ads-btn" onclick="showAd()">WATCH AD</button>
 
-  <div class="stats">
-    Points: <span id="points">0</span><br>
-    🟡 Yellow Coins: <span id="yellow">0</span><br>
-    🔵 Blue Coins: <span id="blue">0</span>
+  <button onclick="tap()">TAP!</button>
+  <button onclick="watchAd()">WATCH AD</button>
+
+  <div id="stats">
+    <p>Points: <span id="points">0</span></p>
+    <p class="yellow">Yellow Coins: <span id="yellow">0</span></p>
+    <p class="blue">Blue Coins: <span id="blue">0</span></p>
   </div>
+
+  <!-- Coin Sound -->
+  <audio id="coinSound" src="https://www.myinstants.com/media/sounds/coin.mp3" preload="auto"></audio>
 
   <script>
     let points = 0;
     let yellow = 0;
     let blue = 0;
 
+    const coinSound = document.getElementById("coinSound");
+
     function tap() {
       points++;
-      if (points >= 1000) {
+      document.getElementById("points").innerText = points;
+
+      if (points % 1000 === 0) {
         yellow++;
-        points = 0;
+        document.getElementById("yellow").innerText = yellow;
+        coinSound.play();
+        if (yellow % 1000 === 0) {
+          blue++;
+          document.getElementById("blue").innerText = blue;
+          coinSound.play();
+        }
       }
-      if (yellow >= 1000) {
-        blue++;
-        yellow = 0;
-      }
-      updateDisplay();
-      saveProgress();
     }
 
-    function showAd() {
-      // NAN NE WURIN DA ZA KA HADA DA MoniTag ko Telegram Mini App Ads
-      // Misali: idan user ya gama kallo, sai a kira awardCoin()
-      alert("Ad is showing... (nan daga baya zaka saka MoniTag/Telegram Ads SDK)");
-
-      // Bayan an kalli ads sai a kira wannan:
-      awardCoin();
+    function watchAd() {
+      // Future: Replace with MoniTag/Telegram Ads SDK
+      setTimeout(() => {
+        yellow++;
+        document.getElementById("yellow").innerText = yellow;
+        coinSound.play();
+        alert("You earned 1 Yellow Coin from watching an Ad!");
+      }, 2000);
     }
-
-    function awardCoin() {
-      yellow++;
-      if (yellow >= 1000) {
-        blue++;
-        yellow = 0;
-      }
-      updateDisplay();
-      saveProgress();
-    }
-
-    function updateDisplay() {
-      document.getElementById("points").textContent = points;
-      document.getElementById("yellow").textContent = yellow;
-      document.getElementById("blue").textContent = blue;
-    }
-
-    function saveProgress() {
-      localStorage.setItem("points", points);
-      localStorage.setItem("yellow", yellow);
-      localStorage.setItem("blue", blue);
-    }
-
-    function loadProgress() {
-      points = parseInt(localStorage.getItem("points")) || 0;
-      yellow = parseInt(localStorage.getItem("yellow")) || 0;
-      blue = parseInt(localStorage.getItem("blue")) || 0;
-      updateDisplay();
-    }
-
-    loadProgress();
   </script>
-
 </body>
 </html>
