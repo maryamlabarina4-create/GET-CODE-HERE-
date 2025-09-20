@@ -54,37 +54,53 @@
   <audio id="coinSound" src="https://www.myinstants.com/media/sounds/coin.mp3" preload="auto"></audio>
 
   <script>
-    let points = 0;
-    let yellow = 0;
-    let blue = 0;
+    // Load saved data
+    let points = parseInt(localStorage.getItem("points")) || 0;
+    let yellow = parseInt(localStorage.getItem("yellow")) || 0;
+    let blue = parseInt(localStorage.getItem("blue")) || 0;
 
     const coinSound = document.getElementById("coinSound");
 
+    // Update UI
+    function updateUI() {
+      document.getElementById("points").innerText = points;
+      document.getElementById("yellow").innerText = yellow;
+      document.getElementById("blue").innerText = blue;
+    }
+
+    function saveData() {
+      localStorage.setItem("points", points);
+      localStorage.setItem("yellow", yellow);
+      localStorage.setItem("blue", blue);
+    }
+
     function tap() {
       points++;
-      document.getElementById("points").innerText = points;
-
       if (points % 1000 === 0) {
         yellow++;
-        document.getElementById("yellow").innerText = yellow;
         coinSound.play();
         if (yellow % 1000 === 0) {
           blue++;
-          document.getElementById("blue").innerText = blue;
           coinSound.play();
         }
       }
+      saveData();
+      updateUI();
     }
 
     function watchAd() {
       // Future: Replace with MoniTag/Telegram Ads SDK
       setTimeout(() => {
         yellow++;
-        document.getElementById("yellow").innerText = yellow;
         coinSound.play();
         alert("You earned 1 Yellow Coin from watching an Ad!");
+        saveData();
+        updateUI();
       }, 2000);
     }
+
+    // Initialize
+    updateUI();
   </script>
 </body>
 </html>
