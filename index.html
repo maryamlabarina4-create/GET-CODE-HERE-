@@ -2,37 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tap & Earn Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f4f4f4;
+      background: #f8f8f8;
       margin: 0;
-      padding: 20px;
+      padding: 50px;
     }
     h1 {
       color: #333;
     }
-    button {
-      font-size: 18px;
-      padding: 10px 20px;
+    .btn {
+      padding: 15px 30px;
       margin: 10px;
+      font-size: 18px;
+      font-weight: bold;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      background: #4CAF50;
-      color: white;
     }
-    button:hover {
-      background: #45a049;
-    }
-    #watchAdBtn {
-      background: #ff9800;
-    }
-    #watchAdBtn:hover {
-      background: #e68900;
-    }
+    .tap-btn { background: #28a745; color: white; }
+    .ads-btn { background: #007bff; color: white; }
     .stats {
       margin-top: 20px;
       font-size: 20px;
@@ -42,65 +35,76 @@
   </style>
 </head>
 <body>
+
   <h1>Tap & Earn Game</h1>
-  <button id="tapBtn">TAP!</button>
-  <button id="watchAdBtn">WATCH AD</button>
+  <button class="btn tap-btn" onclick="tap()">TAP!</button>
+  <button class="btn ads-btn" onclick="showAd()">WATCH AD</button>
 
   <div class="stats">
-    <p>Points: <span id="points">0</span></p>
-    <p>Yellow Coins 🟡: <span id="yellow">0</span></p>
-    <p>Blue Coins 🔵: <span id="blue">0</span></p>
+    Points: <span id="points">0</span><br>
+    🟡 Yellow Coins: <span id="yellow">0</span><br>
+    🔵 Blue Coins: <span id="blue">0</span>
   </div>
 
   <script>
-    // 🟡 Load saved data ko 0 idan babu
-    let points = parseInt(localStorage.getItem('points')) || 0;
-    let yellow = parseInt(localStorage.getItem('yellow')) || 0;
-    let blue = parseInt(localStorage.getItem('blue')) || 0;
+    let points = 0;
+    let yellow = 0;
+    let blue = 0;
 
-    const pointsEl = document.getElementById('points');
-    const yellowEl = document.getElementById('yellow');
-    const blueEl = document.getElementById('blue');
-
-    // 🟡 Update UI
-    function updateDisplay() {
-      pointsEl.textContent = points;
-      yellowEl.textContent = yellow;
-      blueEl.textContent = blue;
-
-      // Save duk lokacin da aka update
-      localStorage.setItem('points', points);
-      localStorage.setItem('yellow', yellow);
-      localStorage.setItem('blue', blue);
-    }
-
-    // TAP button
-    document.getElementById('tapBtn').addEventListener('click', () => {
+    function tap() {
       points++;
       if (points >= 1000) {
-        points = 0;
         yellow++;
+        points = 0;
       }
       if (yellow >= 1000) {
-        yellow = 0;
         blue++;
+        yellow = 0;
       }
       updateDisplay();
-    });
+      saveProgress();
+    }
 
-    // WATCH AD button
-    document.getElementById('watchAdBtn').addEventListener('click', () => {
+    function showAd() {
+      // NAN NE WURIN DA ZA KA HADA DA MoniTag ko Telegram Mini App Ads
+      // Misali: idan user ya gama kallo, sai a kira awardCoin()
+      alert("Ad is showing... (nan daga baya zaka saka MoniTag/Telegram Ads SDK)");
+
+      // Bayan an kalli ads sai a kira wannan:
+      awardCoin();
+    }
+
+    function awardCoin() {
       yellow++;
       if (yellow >= 1000) {
-        yellow = 0;
         blue++;
+        yellow = 0;
       }
       updateDisplay();
-      alert("Ad watched! You earned 1 🟡 Yellow Coin.");
-    });
+      saveProgress();
+    }
 
-    // 🟡 Fara da saved data
-    updateDisplay();
+    function updateDisplay() {
+      document.getElementById("points").textContent = points;
+      document.getElementById("yellow").textContent = yellow;
+      document.getElementById("blue").textContent = blue;
+    }
+
+    function saveProgress() {
+      localStorage.setItem("points", points);
+      localStorage.setItem("yellow", yellow);
+      localStorage.setItem("blue", blue);
+    }
+
+    function loadProgress() {
+      points = parseInt(localStorage.getItem("points")) || 0;
+      yellow = parseInt(localStorage.getItem("yellow")) || 0;
+      blue = parseInt(localStorage.getItem("blue")) || 0;
+      updateDisplay();
+    }
+
+    loadProgress();
   </script>
+
 </body>
 </html>
