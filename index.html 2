@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tap to Earn Coins</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+    h1 {
+      color: #333;
+    }
+    #tapBtn, #adBtn {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+    #tapBtn {
+      background: gold;
+      color: #000;
+    }
+    #tapBtn:hover {
+      background: orange;
+    }
+    #adBtn {
+      background: #007bff;
+      color: #fff;
+    }
+    #adBtn:hover {
+      background: #0056b3;
+    }
+    .coins {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+    .yellow {
+      color: goldenrod;
+      font-weight: bold;
+    }
+    .blue {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪙 Tap & Earn Game</h1>
+
+  <button id="tapBtn">TAP!</button>
+  <button id="adBtn">WATCH AD</button>
+
+  <div class="coins">
+    Yellow Coins: <span id="yellowCoins" class="yellow">0</span><br>
+    Blue Coins: <span id="blueCoins" class="blue">0</span>
+  </div>
+
+  <script>
+    let yellowCoins = 0;
+    let blueCoins = 0;
+    let tapCount = 0;
+
+    const yellowDisplay = document.getElementById("yellowCoins");
+    const blueDisplay = document.getElementById("blueCoins");
+
+    // tapping button
+    document.getElementById("tapBtn").addEventListener("click", () => {
+      tapCount++;
+      if (tapCount >= 1000) {
+        blueCoins += 1;
+        tapCount = 0;
+      }
+      updateDisplay();
+    });
+
+    // watch ad button
+    document.getElementById("adBtn").addEventListener("click", () => {
+      yellowCoins += 1;
+      if (yellowCoins >= 1000) {
+        blueCoins += Math.floor(yellowCoins / 1000);
+        yellowCoins = yellowCoins % 1000;
+      }
+      updateDisplay();
+    });
+
+    function updateDisplay() {
+      yellowDisplay.textContent = yellowCoins;
+      blueDisplay.textContent = blueCoins;
+    }
+  </script>
+</body>
+</html>
