@@ -8,7 +8,7 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f4f4f4;
+      background: #ffffff;
       padding: 30px;
     }
     h1 {
@@ -70,30 +70,35 @@
     const yellowDisplay = document.getElementById("yellowCoins");
     const blueDisplay = document.getElementById("blueCoins");
 
-    // tapping button
-    document.getElementById("tapBtn").addEventListener("click", () => {
-      tapCount++;
-      if (tapCount >= 1000) {
-        blueCoins += 1;
-        tapCount = 0;
-      }
-      updateDisplay();
-    });
-
-    // watch ad button
-    document.getElementById("adBtn").addEventListener("click", () => {
-      yellowCoins += 1;
-      if (yellowCoins >= 1000) {
-        blueCoins += Math.floor(yellowCoins / 1000);
-        yellowCoins = yellowCoins % 1000;
-      }
-      updateDisplay();
-    });
-
+    // Function to update coins
     function updateDisplay() {
       yellowDisplay.textContent = yellowCoins;
       blueDisplay.textContent = blueCoins;
     }
+
+    // tapping button (1000 taps = 1 blue coin)
+    document.getElementById("tapBtn").addEventListener("click", () => {
+      tapCount++;
+      if (tapCount >= 1000) {
+        blueCoins += 1;
+        tapCount = 0; // reset counting
+      }
+      updateDisplay();
+    });
+
+    // watch ad button (1 ad = 1 yellow coin, 1000 yellow = 1 blue)
+    document.getElementById("adBtn").addEventListener("click", () => {
+      yellowCoins += 1;
+      if (yellowCoins >= 1000) {
+        let extraBlue = Math.floor(yellowCoins / 1000);
+        blueCoins += extraBlue;
+        yellowCoins = yellowCoins % 1000; // remainder
+      }
+      updateDisplay();
+    });
+
+    // Initial display
+    updateDisplay();
   </script>
 </body>
 </html>
